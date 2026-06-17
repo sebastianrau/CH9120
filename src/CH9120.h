@@ -5,10 +5,10 @@
 #include <stdio.h>
 
 
-#define MODE_TCP_SERVER 0
-#define MODE_TCP_CLIENT 1
-#define MODE_UDP_SERVER 2
-#define MODE_UDP_CLIENT 3
+#define MODE_TCP_SERVER 0x00
+#define MODE_TCP_CLIENT 0x01
+#define MODE_UDP_SERVER 0x02
+#define MODE_UDP_CLIENT 0x03
 
 #define REG_MODE1 0x10                //Port 1: Setup Mode   0x00:TCP Server 0x01:TCP Client 0x02:UDP Server 0x03:UDP Client
 #define REG_LOCAL_IP 0x11             //Local IP

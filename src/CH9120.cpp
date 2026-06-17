@@ -58,13 +58,6 @@ bool CH9120::readParameter(uint8_t command, uint8_t* data, size_t len) {
 }
 
 
-/*
-void CH9120::StartConfig() {
-  digitalWrite(cfgPin, 0);
-  digitalWrite(resPin, 1);
-  delay(50);
-}
-*/
 void CH9120::StartConfig() {
   serialPort.flush();
   serialPort.end();
@@ -80,7 +73,6 @@ void CH9120::StartConfig() {
     serialPort.read();
   }
 }
-
 void CH9120::EndConfig(bool reset)
  {
     // Save to EEPROM
@@ -101,8 +93,37 @@ void CH9120::EndConfig(bool reset)
 
 }
 
+void CH9120::Init(const CH9120Config& cfg) {
+  transportBaud = cfg.baudRate;
+  serialPort.begin(9600);  //fix baud rate
+
+  pinMode(cfgPin, OUTPUT);
+  pinMode(resPin, OUTPUT);
+
+  StartConfig();
+  delay(250);
+  SetMode(cfg.mode);  //Mode
+  SetDHCP(cfg.dhcpEnabled);
+  if (!cfg.dhcpEnabled) {
+    SetLocalIP((uint8_t*)cfg.localIP);        //LOCALIP
+    SetSubnetMask((uint8_t*)cfg.subnetMask);  //SUBNET MASK
+    SetGateway((uint8_t*)cfg.gateway);        //GATEWAY
+  }
+  SetTargetIP((uint8_t*)cfg.targetIP);  //TARGET IP
+  SetLocalPort(cfg.localPort);          //Local port
+  SetTargetPort(cfg.targetPort);        //Target port
+  SetBaudRate(cfg.baudRate);            //Port 1 baud rate
+  EndConfig(true);
+
+  serialPort.begin(cfg.baudRate);
+  while (serialPort.available()) {
+    serialPort.read();
+  }
+}
+
+
 bool CH9120::GetMode(uint8_t* mode) {
-  return readParameter(0x60, mode, 1);
+  return readParameter(REG_READ_MODE, mode, 1);
 }
 void CH9120::SetMode(unsigned char mode) {
   setParameter(REG_MODE1, &mode, 1);
@@ -189,7 +210,6 @@ bool CH9120::GetBaudRate(uint32_t* baud) {
 
   return true;
 }
-
 void CH9120::SetBaudRate(const uint32_t baud) {
   uint8_t data[4] = {
     (uint8_t)(baud & 0xFF),
@@ -207,34 +227,6 @@ bool CH9120::GetMAC(uint8_t mac[6])
 }
 
 
-void CH9120::Init(const CH9120Config& cfg) {
-
-
-  transportBaud = cfg.baudRate;
-  serialPort.begin(9600);  //fix baud rate
-
-  pinMode(cfgPin, OUTPUT);
-  pinMode(resPin, OUTPUT);
-
-  StartConfig();
-  SetMode(cfg.mode);  //Mode
-  SetDHCP(cfg.dhcpEnabled);
-  if (!cfg.dhcpEnabled) {
-    SetLocalIP((uint8_t*)cfg.localIP);        //LOCALIP
-    SetSubnetMask((uint8_t*)cfg.subnetMask);  //SUBNET MASK
-    SetGateway((uint8_t*)cfg.gateway);        //GATEWAY
-  }
-  SetTargetIP((uint8_t*)cfg.targetIP);  //TARGET IP
-  SetLocalPort(cfg.localPort);          //Local port
-  SetTargetPort(cfg.targetPort);        //Target port
-  SetBaudRate(cfg.baudRate);            //Port 1 baud rate
-  EndConfig();
-
-  serialPort.begin(cfg.baudRate);
-  while (serialPort.available()) {
-    serialPort.read();
-  }
-}
 
 
 Stream& CH9120::GetStream() {

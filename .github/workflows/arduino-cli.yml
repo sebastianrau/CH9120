@@ -1,0 +1,35 @@
+name: Arduino CLI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  compile-examples:
+    name: Compile examples
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - sketch: examples/Basic
+            fqbn: rp2040:rp2040:rpipico2
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v2
+
+      - name: Install Arduino cores
+        run: |
+          arduino-cli core update-index --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+          arduino-cli core install rp2040:rp2040 --additional-urls https://github.com/earlephilhower/arduino-pico/releases/download/global/package_rp2040_index.json
+
+      - name: Compile ${{ matrix.sketch }}
+        run: arduino-cli compile --fqbn ${{ matrix.fqbn }} --library . ${{ matrix.sketch }}

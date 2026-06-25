@@ -262,7 +262,6 @@ size_t CH9120::Write(const uint8_t* data, size_t size) {
 
 
 void CH9120::PrintConfig(Stream& out) {
-  bool dhcp;
   uint8_t mode;
   uint8_t ip[4];
   uint8_t mask[4];

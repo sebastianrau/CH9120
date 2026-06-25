@@ -56,27 +56,32 @@ When `dhcpEnabled` is `true`, `Init()` skips writing the static local IP, subnet
 ```cpp
 #include <CH9120.h>
 
-constexpr int CH9120_RES_PIN = 4;
-constexpr int CH9120_CFG_PIN = 5;
+constexpr int CH9120_CFG_PIN = 18;
+constexpr int CH9120_RES_PIN = 19;
+constexpr int UART_TX_PIN1 = 20;
+constexpr int UART_RX_PIN1 = 21;
 
-CH9120 ch9120(Serial1, CH9120_RES_PIN, CH9120_CFG_PIN);
+CH9120 ch9120(Serial2, CH9120_RES_PIN, CH9120_CFG_PIN);
 
 CH9120Config cfg = {
   .mode = MODE_UDP_SERVER,
   .dhcpEnabled = true,
-  .localIP = { 192, 168, 0, 7 },
+  .localIP = { 192, 168, 192, 7 },
   .subnetMask = { 255, 255, 255, 0 },
-  .gateway = { 192, 168, 0, 1 },
-  .localPort = 36666,
-  .targetIP = { 192, 168, 0, 255 },
-  .targetPort = 36666,
+  .gateway = { 192, 168, 192, 1 },
+  .localPort = 6454,
+  .targetIP = { 192, 168, 192, 255 },
+  .targetPort = 6454,
   .baudRate = 921600
 };
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(921600);
 
-  ch9120.Init(config);
+  Serial2.setTX(UART_TX_PIN1);
+  Serial2.setRX(UART_RX_PIN1);
+
+  ch9120.Init(cfg);
   ch9120.PrintConfig(Serial);
 
   Serial.println("CH9120 initialized");
